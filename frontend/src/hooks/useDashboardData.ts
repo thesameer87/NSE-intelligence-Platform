@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useApi } from "./useApi";
 import { useWebSocket } from "./useWebSocket";
 import { marketApi, predictionApi, signalApi, portfolioApi } from "../api/client";
@@ -14,11 +14,16 @@ export interface DashboardData {
 }
 
 export function useDashboardData(symbol = "NIFTY 50"): DashboardData {
-  // 1. Initial REST fetch
-  const ticksApi = useApi(() => marketApi.getIntradayTicks(symbol));
-  const modelsApi = useApi(() => predictionApi.getLatestModels());
-  const signalsApi = useApi(() => signalApi.getSignals());
-  const portfolioApiData = useApi(() => portfolioApi.getHoldings());
+  // 1. Initial REST fetch - memoized to prevent infinite re-renders in useApi
+  const fetchTicks = useCallback(() => marketApi.getIntradayTicks(symbol), [symbol]);
+  const fetchModels = useCallback(() => predictionApi.getLatestModels(), []);
+  const fetchSignals = useCallback(() => signalApi.getSignals(), []);
+  const fetchPortfolio = useCallback(() => portfolioApi.getHoldings(), []);
+
+  const ticksApi = useApi(fetchTicks);
+  const modelsApi = useApi(fetchModels);
+  const signalsApi = useApi(fetchSignals);
+  const portfolioApiData = useApi(fetchPortfolio);
 
   // 2. Real-time WebSocket connection
   const { isConnected, lastMessage } = useWebSocket();

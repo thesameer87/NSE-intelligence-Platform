@@ -22,21 +22,40 @@ scheduler = MarketScheduler(
 )
 
 
+from backend.orchestrator.tasks import MockIngestionTask
+from backend.db.session import async_session_maker
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Application starting up...")
     app.state.websocket_manager = ConnectionManager()
+    
+    # Use mock credentials before deployment
+    if settings.environment in ("development", "test") or settings.angel_one_api_key == "your_api_key_here":
+        mock_task = MockIngestionTask(app.state.websocket_manager, async_session_maker)
+        orchestrator_tasks.append(mock_task)
+        
     await scheduler.start()
     yield
     logger.info("Application shutting down...")
     await scheduler.stop()
 
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(
     title="NSE Intelligence Platform",
     version="2.0.0",
     description="Production Grade AI Intelligence Architecture API",
     lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Include routers
