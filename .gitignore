@@ -1,0 +1,20 @@
+# Environments
+venv/
+env/
+.env
+
+# Python caches
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+backend/.mypy_cache/
+
+# Node caches
+node_modules/
+dist/
+
+# SQLite
+*.db
+*.sqlite3

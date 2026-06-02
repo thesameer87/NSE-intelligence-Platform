@@ -1,0 +1,60 @@
+.market-tick-table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.market-tick-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.market-tick-table__th {
+  padding: var(--spacing-2) var(--spacing-3);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+  text-align: left;
+}
+
+.market-tick-table__th--right {
+  text-align: right;
+}
+
+.market-tick-table__td {
+  padding: var(--spacing-2) var(--spacing-3);
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.market-tick-table__row:last-child .market-tick-table__td {
+  border-bottom: none;
+}
+
+.market-tick-table__row {
+  transition: background-color var(--transition-fast);
+}
+
+.market-tick-table__row:hover {
+  background-color: color-mix(in srgb, var(--color-surface) 90%, var(--color-text-primary) 10%);
+}
+
+.market-tick-table__td--symbol {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.market-tick-table__td--right {
+  text-align: right;
+}
+
+.market-tick-table__td--mono {
+  font-variant-numeric: tabular-nums;
+}
+
+.market-tick-table__td--time {
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}

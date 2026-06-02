@@ -1,0 +1,17 @@
+fastapi==0.136.1
+uvicorn[standard]==0.46.0
+pydantic==2.12.5
+pydantic-settings==2.13.1
+python-dotenv==1.2.2
+ruff==0.15.15
+black==26.5.1
+mypy==2.1.0
+pytest==8.4.2
+httpx==0.28.1
+sqlalchemy==2.0.50
+asyncpg==0.31.0
+alembic==1.18.4
+tzdata==2024.1
+PyJWT==2.8.0
+bcrypt==4.1.2
+pytest-asyncio==1.4.0

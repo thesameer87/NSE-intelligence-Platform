@@ -1,0 +1,65 @@
+.portfolio-table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.portfolio-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.portfolio-table__th {
+  padding: var(--spacing-2) var(--spacing-3);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+  text-align: left;
+}
+
+.portfolio-table__th--right {
+  text-align: right;
+}
+
+.portfolio-table__td {
+  padding: var(--spacing-2) var(--spacing-3);
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.portfolio-table__row:last-child .portfolio-table__td {
+  border-bottom: none;
+}
+
+.portfolio-table__row {
+  transition: background-color var(--transition-fast);
+}
+
+.portfolio-table__row:hover {
+  background-color: color-mix(in srgb, var(--color-surface) 90%, var(--color-text-primary) 10%);
+}
+
+.portfolio-table__td--symbol {
+  font-weight: 600;
+}
+
+.portfolio-table__td--right {
+  text-align: right;
+}
+
+.portfolio-table__td--mono {
+  font-variant-numeric: tabular-nums;
+}
+
+.portfolio-table__td--date,
+.portfolio-table__td--notes {
+  color: var(--color-text-secondary);
+}
+
+.portfolio-table__empty-note {
+  color: var(--color-text-secondary);
+  opacity: 0.6;
+}

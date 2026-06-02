@@ -1,0 +1,68 @@
+name: V1 Quality Gates
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  frontend-validation:
+    name: Frontend Quality Gates
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: ./frontend/package-lock.json
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Lint verification
+        run: npm run lint
+        
+      - name: Test verification
+        run: npx vitest run
+        
+      - name: Build verification
+        run: npm run build
+
+  backend-validation:
+    name: Backend Quality Gates
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+          pip install pytest mypy httpx
+          
+      - name: Mypy verification
+        run: mypy backend/
+        
+      - name: Pytest verification
+        run: pytest backend/
+        env:
+          # Deterministic environment overrides for safe testing
+          ENVIRONMENT: test
+          LOG_LEVEL: DEBUG
+          API_HOST: 0.0.0.0
+          API_PORT: 8000

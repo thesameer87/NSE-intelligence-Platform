@@ -1,0 +1,25 @@
+.price-change {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.price-change--positive {
+  color: var(--color-success);
+}
+
+.price-change--negative {
+  color: var(--color-error);
+}
+
+.price-change--neutral {
+  color: var(--color-text-primary);
+}
+
+.price-change__arrow {
+  font-size: var(--font-size-xs);
+  line-height: 1;
+}
