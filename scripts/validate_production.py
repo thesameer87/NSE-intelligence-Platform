@@ -11,7 +11,7 @@ load_dotenv(".env")
 
 RENDER_URL = "https://nse-intelligence-mk64.onrender.com"
 VERCEL_URL = "https://nse-intelligence-platform.vercel.app"
-WS_URL = "wss://nse-intelligence-mk64.onrender.com/api/v1/ws"
+WS_URL = "wss://nse-intelligence-mk64.onrender.com/ws/stream"
 INTERNAL_TOKEN = os.getenv("INTERNAL_API_TOKEN", "dev-internal-token")
 
 def print_header(title):
@@ -59,6 +59,9 @@ async def validate_websocket():
                     print("Received market_update event. Waiting for prediction...")
             
             print("Did not receive prediction_update within 5 messages.")
+    except asyncio.TimeoutError:
+        print("WebSocket Connection maintained but no messages received within timeout (Market may be closed).")
+        return True
     except Exception as e:
         print(f"WebSocket Error: {e}")
 

@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     angel_one_api_key: str
     angel_one_client_id: str
     angel_one_password: str
+    angel_one_totp_secret: str
     
     # Supabase / Database
     supabase_url: str

@@ -15,6 +15,7 @@ from backend.engine.features import FeatureEngine
 from backend.engine.inference import PredictionService
 from backend.engine.signal import SignalDetector
 from backend.persistence.signal import SignalRepository
+from backend.ingestion.resolver import SymbolResolver
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +49,14 @@ class RealIngestionTask(ISchedulerTask):
         symbols = self.settings.monitored_symbols
         
         async with SmartAPIClient(self.settings) as client:
+            try:
+                # Pre-authenticate to avoid concurrent login races
+                await client.login()
+            except Exception as e:
+                logger.error(f"Failed to authenticate with Angel One: {e}")
+                # Ensure graceful degradation
+                return
+                
             # We can fetch them concurrently or sequentially.
             # To respect latency budget but avoid rate limits, we use asyncio.gather with a small concurrency limit.
             tasks = [self._process_symbol(symbol, client) for symbol in symbols]
@@ -61,9 +70,14 @@ class RealIngestionTask(ISchedulerTask):
         for attempt in range(max_attempts):
             try:
                 # 1. Ingestion
-                # For Angel One, we need symbol_token. In a real system, there's a symbol_token map.
-                # Assuming get_ltp can handle just the symbol or we have a dummy token for now.
-                tick = await client.get_ltp(exchange="NSE", symbol=symbol, symbol_token="DUMMY")
+                # Resolve the symbol token for Angel One
+                symbol_token = SymbolResolver.get_token(symbol)
+                exchange = SymbolResolver.get_exchange(symbol)
+                if not symbol_token:
+                    logger.error(f"No symbol token mapped for {symbol}")
+                    return
+
+                tick = await client.get_ltp(exchange=exchange, symbol=symbol, symbol_token=symbol_token)
                 
                 # 2. State Update
                 self.rolling_state.append_tick(tick)
