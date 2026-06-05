@@ -12,6 +12,7 @@ from backend.utils.logger import logger
 class IPredictionRepository(Protocol):
     """Protocol for prediction persistence operations."""
     async def get_latest_models(self) -> list[ModelRegistryResponse]: ...
+    async def get_active_model_paths(self) -> dict[str, str]: ...
 
 
 class PredictionRepository:
@@ -20,9 +21,9 @@ class PredictionRepository:
         self.session = session
 
     async def get_latest_models(self) -> list[ModelRegistryResponse]:
-        """Fetch latest models from registry."""
+        """Fetch latest active models from registry."""
         try:
-            stmt = select(ModelRegistry).order_by(ModelRegistry.trained_at.desc())
+            stmt = select(ModelRegistry).where(ModelRegistry.active == True).order_by(ModelRegistry.created_at.desc())
             result = await self.session.execute(stmt)
             models = result.scalars().all()
             
@@ -30,12 +31,27 @@ class PredictionRepository:
                 ModelRegistryResponse(
                     model_name=m.model_name,
                     version=m.version,
-                    metrics_json=m.metrics_json,
-                    schema_version=m.schema_version,
-                    trained_at=m.trained_at,
+                    artifact_path=m.artifact_path,
+                    active=m.active,
+                    created_at=m.created_at,
                 )
                 for m in models
             ]
         except SQLAlchemyError as e:
             logger.error(f"Failed to fetch models: {e}")
             raise DatabaseOperationError("Database error while fetching models") from e
+
+    async def get_active_model_paths(self) -> dict[str, str]:
+        """
+        Returns a dictionary mapping model_name to artifact_path
+        for all currently active models.
+        """
+        models = await self.get_latest_models()
+        
+        # Deduplicate to ensure we only return the latest active version per model_name
+        paths: dict[str, str] = {}
+        for m in models:
+            if m.model_name not in paths:
+                paths[m.model_name] = m.artifact_path
+                
+        return paths

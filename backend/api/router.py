@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from backend.api import market, portfolio, prediction, signal
+from backend.api import market, portfolio, prediction, signal, internal
 
 api_router = APIRouter(prefix="/api/v1")
 
@@ -9,3 +9,4 @@ api_router.include_router(market.router)
 api_router.include_router(prediction.router)
 api_router.include_router(signal.router)
 api_router.include_router(portfolio.router)
+api_router.include_router(internal.router)

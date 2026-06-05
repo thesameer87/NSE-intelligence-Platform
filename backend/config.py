@@ -26,7 +26,15 @@ class Settings(BaseSettings):
     # Observability
     sentry_dsn: str | None = None
 
-
+    # Intelligence Runtime
+    rolling_window_size: int = Field(default=100, ge=50, description="Size of the rolling window buffer per symbol")
+    signal_confidence_threshold: float = Field(default=0.75, ge=0.5, le=1.0)
+    signal_min_expected_return: float = Field(default=0.005, ge=0.0)
+    signal_regression_alignment_threshold: float = Field(default=0.6, ge=0.5, le=1.0)
+    monitored_symbols: list[str] = Field(
+        default=["RELIANCE-EQ", "TCS-EQ", "HDFCBANK-EQ", "INFY-EQ", "ICICIBANK-EQ"]
+    )
+    
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

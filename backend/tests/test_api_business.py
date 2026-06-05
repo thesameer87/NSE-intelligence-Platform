@@ -99,23 +99,25 @@ def test_get_daily_ohlcv_success() -> None:
 
 def test_get_latest_models_success() -> None:
     """Test reading latest models successfully."""
-    mock_model = ModelRegistry(
-        model_name="xgboost_intraday",
-        version="v1.0.0",
-        trained_at=datetime.now(timezone.utc),
-        metrics_json={"accuracy": 0.85},
-        schema_version="1.0",
-    )
-
-    mock_result = MagicMock()
-    mock_result.scalars().all.return_value = [mock_model]
-    mock_db_session.execute.return_value = mock_result
+    mock_db_session.execute.return_value.scalars.return_value.all.return_value = [
+        ModelRegistry(
+            model_name="intraday_clf",
+            version="v2",
+            artifact_path="models/intraday_clf/v2.txt",
+            active=True,
+            created_at=datetime(2023, 10, 10, 10, 0, 0, tzinfo=timezone.utc),
+        )
+    ]
 
     response = client.get("/api/v1/prediction/models/latest")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 1
-    assert data[0]["model_name"] == "xgboost_intraday"
+    assert len(data["models"]) == 1
+    model = data["models"][0]
+    assert model["model_name"] == "intraday_clf"
+    assert model["version"] == "v2"
+    assert model["artifact_path"] == "models/intraday_clf/v2.txt"
+    assert model["active"] is True
 
 
 def test_get_prediction_not_found() -> None:

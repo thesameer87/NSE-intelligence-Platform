@@ -37,8 +37,13 @@ class PredictionResponse(BaseSchema):
     """Aggregated prediction response for a symbol."""
 
     symbol: str = Field(..., description="NSE Stock Symbol")
-    intraday: IntradayPrediction
-    nextday: NextDayPrediction
+    prediction_runtime_enabled: bool = Field(default=True, description="Whether the prediction runtime is active")
+    available_models: list[str] = Field(default_factory=list)
+    unavailable_models: list[str] = Field(default_factory=list)
+    last_reload_time: str | None = None
+    last_reload_status: str | None = None
+    intraday: IntradayPrediction | None = None
+    nextday: NextDayPrediction | None = None
 
 
 class ModelRegistryBase(BaseSchema):
@@ -46,8 +51,8 @@ class ModelRegistryBase(BaseSchema):
 
     model_name: str
     version: str
-    metrics_json: dict[str, Any]
-    schema_version: str
+    artifact_path: str
+    active: bool = True
 
 
 class ModelRegistryCreate(ModelRegistryBase):
@@ -59,4 +64,24 @@ class ModelRegistryCreate(ModelRegistryBase):
 class ModelRegistryResponse(ModelRegistryBase):
     """Schema for returning model registry information."""
 
-    trained_at: datetime
+    created_at: datetime
+
+
+class ModelLatestResponse(BaseSchema):
+    """Schema for returning latest models along with reload status."""
+    
+    last_reload_time: str | None
+    last_reload_status: str
+    last_reload_duration_ms: float
+    models: list[ModelRegistryResponse]
+
+
+class ModelReloadResponse(BaseSchema):
+    """Schema for model reload endpoint."""
+    
+    success: bool
+    reload_time_ms: float
+    available_models: list[str]
+    unavailable_models: list[str]
+    last_reload_time: str | None
+    last_reload_status: str

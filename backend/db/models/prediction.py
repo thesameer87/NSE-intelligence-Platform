@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from sqlalchemy import DateTime, String
@@ -13,6 +13,6 @@ class ModelRegistry(Base):
 
     model_name: Mapped[str] = mapped_column(String, primary_key=True)
     version: Mapped[str] = mapped_column(String, primary_key=True)
-    trained_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    metrics_json: Mapped[dict[str, Any]] = mapped_column(JSONB)
-    schema_version: Mapped[str] = mapped_column(String)
+    artifact_path: Mapped[str] = mapped_column(String, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    active: Mapped[bool] = mapped_column(default=True)

@@ -12,6 +12,7 @@ from backend.utils.logger import logger
 class ISignalRepository(Protocol):
     """Protocol for signal persistence operations."""
     async def get_signals(self) -> list[TradingSignalResponse]: ...
+    async def save_signal(self, signal: TradingSignal) -> None: ...
 
 
 class SignalRepository:
@@ -42,3 +43,14 @@ class SignalRepository:
         except SQLAlchemyError as e:
             logger.error(f"Failed to fetch signals: {e}")
             raise DatabaseOperationError("Database error while fetching signals") from e
+
+    async def save_signal(self, signal: TradingSignal) -> None:
+        """Save a new trading signal."""
+        try:
+            self.session.add(signal)
+            await self.session.commit()
+            await self.session.refresh(signal)
+        except SQLAlchemyError as e:
+            await self.session.rollback()
+            logger.error(f"Failed to save signal: {e}")
+            raise DatabaseOperationError("Database error while saving signal") from e
