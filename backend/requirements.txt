@@ -20,3 +20,4 @@ prometheus-client==0.20.0
 pandas==3.0.3
 numpy==2.4.6
 lightgbm==4.6.0
+pyotp==2.9.0
