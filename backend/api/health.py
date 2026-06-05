@@ -22,6 +22,9 @@ async def health_check() -> HealthResponse:
     )
 
 
+from fastapi.responses import PlainTextResponse
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+
 @router.get("/metrics", response_model=MetricsResponse)
 async def get_metrics() -> MetricsResponse:
     """
@@ -29,3 +32,10 @@ async def get_metrics() -> MetricsResponse:
     """
     logger.debug("Metrics endpoint accessed")
     return MetricsResponse(status="stub", message="Metrics will be exposed here in V1")
+
+@router.get("/metrics/prometheus", response_class=PlainTextResponse)
+async def get_prometheus_metrics() -> PlainTextResponse:
+    """
+    Returns actual Prometheus text format metrics.
+    """
+    return PlainTextResponse(generate_latest(), media_type=CONTENT_TYPE_LATEST)

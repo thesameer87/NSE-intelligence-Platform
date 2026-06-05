@@ -3,6 +3,7 @@ from typing import Optional
 
 from backend.orchestrator.interfaces import ISchedulerTask
 from backend.utils.logger import logger
+from backend.utils.metrics import scheduler_iterations
 
 
 class MarketScheduler:
@@ -69,4 +70,5 @@ class MarketScheduler:
                     logger.exception(f"Task '{task.name}' failed during execution: {e}")
             
             if self._is_running:
+                scheduler_iterations.inc()
                 await asyncio.sleep(self.interval_seconds)

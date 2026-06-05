@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expiry_minutes: int = Field(default=15, ge=1)
     internal_api_token: str
+    
+    # Observability
+    sentry_dsn: str | None = None
+
 
     model_config = SettingsConfigDict(
         env_file=".env",

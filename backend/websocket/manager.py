@@ -2,6 +2,7 @@ from fastapi import WebSocket
 
 from backend.utils.logger import logger
 from backend.websocket.schemas import WebSocketMessage
+from backend.utils.metrics import websocket_connections
 
 
 class ConnectionManager:
@@ -16,12 +17,14 @@ class ConnectionManager:
         """Accept and register a new WebSocket connection."""
         await websocket.accept()
         self.active_connections.add(websocket)
+        websocket_connections.inc()
         logger.info(f"WebSocket connection accepted. Total active: {len(self.active_connections)}")
 
     def disconnect(self, websocket: WebSocket) -> None:
         """Remove a disconnected WebSocket from the active set."""
         if websocket in self.active_connections:
             self.active_connections.remove(websocket)
+            websocket_connections.dec()
             logger.info(f"WebSocket connection removed. Total active: {len(self.active_connections)}")
 
     async def broadcast(self, message: WebSocketMessage) -> None:
