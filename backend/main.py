@@ -12,8 +12,11 @@ from backend.websocket.manager import ConnectionManager
 from backend.utils.logger import logger
 from backend.websocket.router import router as websocket_router
 
+from backend.utils.sentry import setup_sentry
+
 # Validate configuration on import/startup to fail fast
 settings = validate_configuration()
+setup_sentry(settings)
 
 # Initialize orchestrator components
 orchestrator_tasks: list[ISchedulerTask] = []
@@ -52,11 +55,29 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:5173", 
+        "http://localhost:3000",
+        "https://nse-intelligence-platform.vercel.app"
+    ],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+from fastapi import Request
+from backend.utils.metrics import http_requests_total
+
+@app.middleware("http")
+async def prometheus_metrics_middleware(request: Request, call_next):
+    response = await call_next(request)
+    http_requests_total.labels(
+        method=request.method,
+        endpoint=request.url.path,
+        status_code=response.status_code
+    ).inc()
+    return response
 
 # Include routers
 app.include_router(health_router)
