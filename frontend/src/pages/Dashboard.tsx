@@ -82,15 +82,17 @@ export function DashboardPage() {
           <Card title="Active Models" subtitle="Registered ML Models">
             {models.status === "loading" && <LoadingState title="Loading models" />}
             {models.status === "error" && <ErrorState title="Failed to load models" description={models.error} />}
-            {models.status === "success" && models.data.length === 0 && (
+            {models.status === "success" && (!models.data?.models || models.data.models.length === 0) && (
               <EmptyState title="No active models" description="No ML models have been registered." />
             )}
-            {models.status === "success" && models.data.length > 0 && (
-              <Table<ModelRegistry>
-                columns={MODEL_COLUMNS}
-                data={models.data}
-                keyExtractor={(item) => `${item.model_name}-${item.version}`}
-              />
+            {models.status === "success" && Array.isArray(models.data?.models) && models.data.models.length > 0 && (
+              <div className="overflow-x-auto">
+                <Table<ModelRegistry>
+                  columns={MODEL_COLUMNS}
+                  data={models.data.models}
+                  keyExtractor={(item) => `${item.model_name}-${item.version}`}
+                />
+              </div>
             )}
           </Card>
         </ErrorBoundary>

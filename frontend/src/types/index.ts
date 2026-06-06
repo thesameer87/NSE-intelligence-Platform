@@ -34,6 +34,22 @@ export interface ModelRegistry {
   trained_at: string;
 }
 
+export interface ModelLatestResponse {
+  last_reload_time: string | null;
+  last_reload_status: string | null;
+  last_reload_duration_ms: number | null;
+  models: ModelRegistry[];
+}
+
+export interface PredictionRuntimeStatus {
+  symbol: string;
+  prediction_runtime_enabled: boolean;
+  available_models: string[];
+  unavailable_models: string[];
+  has_intraday: boolean;
+  has_nextday: boolean;
+}
+
 // ─── Signals ───────────────────────────────────────────────
 export interface TradingSignal {
   id: string;

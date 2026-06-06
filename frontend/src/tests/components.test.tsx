@@ -21,7 +21,7 @@ vi.stubGlobal("WebSocket", MockWebSocket);
 
 // Mock the API client functions to resolve immediately for DashboardPage rendering
 vi.spyOn(clientApi.marketApi, "getIntradayTicks").mockResolvedValue([]);
-vi.spyOn(clientApi.predictionApi, "getLatestModels").mockResolvedValue([]);
+vi.spyOn(clientApi.predictionApi, "getLatestModels").mockResolvedValue({ last_reload_time: null, last_reload_status: null, last_reload_duration_ms: null, models: [] });
 vi.spyOn(clientApi.signalApi, "getSignals").mockResolvedValue([]);
 vi.spyOn(clientApi.portfolioApi, "getHoldings").mockResolvedValue([]);
 

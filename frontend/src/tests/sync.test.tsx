@@ -8,7 +8,7 @@ import type { IntradayTick, TradingSignal } from "../types";
 
 // Mock the API client functions
 vi.spyOn(clientApi.marketApi, "getIntradayTicks").mockResolvedValue([]);
-vi.spyOn(clientApi.predictionApi, "getLatestModels").mockResolvedValue([]);
+vi.spyOn(clientApi.predictionApi, "getLatestModels").mockResolvedValue({ last_reload_time: null, last_reload_status: null, last_reload_duration_ms: null, models: [] });
 vi.spyOn(clientApi.signalApi, "getSignals").mockResolvedValue([]);
 vi.spyOn(clientApi.portfolioApi, "getHoldings").mockResolvedValue([]);
 
@@ -151,8 +151,8 @@ describe("useDashboardData - Synchronization", () => {
 
     // Verify it merged cleanly
     if (result.current.models.status === "success") {
-      expect(result.current.models.data).toHaveLength(1);
-      expect(result.current.models.data[0].version).toBe("v1.1.0");
+      expect(result.current.models.data.models).toHaveLength(1);
+      expect(result.current.models.data.models[0].version).toBe("v1.1.0");
     } else {
       expect.fail("Expected models to be in success state");
     }

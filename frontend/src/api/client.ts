@@ -1,7 +1,7 @@
 import type {
   DailyOHLCV,
   IntradayTick,
-  ModelRegistry,
+  ModelLatestResponse,
   PortfolioHolding,
   TradingSignal,
 } from "../types";
@@ -42,8 +42,8 @@ export const marketApi = {
 
 // ─── Predictions ───────────────────────────────────────────
 export const predictionApi = {
-  getLatestModels: (): Promise<ModelRegistry[]> =>
-    get<ModelRegistry[]>("/api/v1/prediction/models/latest"),
+  getLatestModels: (): Promise<ModelLatestResponse> =>
+    get<ModelLatestResponse>("/api/v1/prediction/models/latest"),
 };
 
 // ─── Signals ───────────────────────────────────────────────

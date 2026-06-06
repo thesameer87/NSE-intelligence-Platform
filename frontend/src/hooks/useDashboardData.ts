@@ -1,14 +1,15 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { useApi } from "./useApi";
 import { useWebSocket } from "./useWebSocket";
 import { marketApi, predictionApi, signalApi, portfolioApi } from "../api/client";
-import type { IntradayTick, ModelRegistry, TradingSignal, PortfolioHolding, ApiState } from "../types";
+import type { IntradayTick, ModelLatestResponse, PredictionRuntimeStatus, TradingSignal, PortfolioHolding, ApiState } from "../types";
 
 export interface DashboardData {
   ticks: ApiState<IntradayTick[]>;
-  models: ApiState<ModelRegistry[]>;
+  models: ApiState<ModelLatestResponse>;
   signals: ApiState<TradingSignal[]>;
   portfolio: ApiState<PortfolioHolding[]>;
+  runtimeStatus: PredictionRuntimeStatus | null;
   isConnected: boolean;
   refreshAll: () => void;
 }
@@ -27,6 +28,7 @@ export function useDashboardData(symbol = "NIFTY 50"): DashboardData {
 
   // 2. Real-time WebSocket connection
   const { isConnected, lastMessage } = useWebSocket();
+  const [runtimeStatus, setRuntimeStatus] = useState<PredictionRuntimeStatus | null>(null);
 
   // 3. Reconcile WebSocket updates deterministically
   useEffect(() => {
@@ -38,6 +40,7 @@ export function useDashboardData(symbol = "NIFTY 50"): DashboardData {
         // Only update if it matches our symbol
         if (newTick.symbol === symbol) {
           ticksApi.updateData((prevTicks) => {
+            if (!Array.isArray(prevTicks)) return prevTicks;
             // Prepend new tick (backend/REST controls retention policy, frontend just merges)
             return [newTick, ...prevTicks.filter((t) => t.id !== newTick.id)];
           });
@@ -48,6 +51,7 @@ export function useDashboardData(symbol = "NIFTY 50"): DashboardData {
       case "signal_alert": {
         const newSignal = lastMessage.data as unknown as TradingSignal;
         signalsApi.updateData((prevSignals) => {
+          if (!Array.isArray(prevSignals)) return prevSignals;
           // Prepend new signal, filter out exact duplicates by id
           return [newSignal, ...prevSignals.filter((s) => s.id !== newSignal.id)];
         });
@@ -55,22 +59,17 @@ export function useDashboardData(symbol = "NIFTY 50"): DashboardData {
       }
 
       case "prediction_update": {
-        const newModel = lastMessage.data as unknown as ModelRegistry;
-        modelsApi.updateData((prevModels) => {
-          // Prepend new model, dedup by exact model_name and version
-          return [
-            newModel,
-            ...prevModels.filter(
-              (m) => !(m.model_name === newModel.model_name && m.version === newModel.version)
-            ),
-          ];
-        });
+        const newStatus = lastMessage.data as unknown as PredictionRuntimeStatus;
+        if (newStatus.symbol === symbol) {
+          setRuntimeStatus(newStatus);
+        }
         break;
       }
 
       case "portfolio_update": {
         const updatedHolding = lastMessage.data as unknown as PortfolioHolding;
         portfolioApiData.updateData((prevHoldings) => {
+          if (!Array.isArray(prevHoldings)) return prevHoldings;
           // Update or append
           const exists = prevHoldings.find((h) => h.symbol === updatedHolding.symbol);
           if (exists) {
@@ -105,6 +104,7 @@ export function useDashboardData(symbol = "NIFTY 50"): DashboardData {
     models: modelsApi,
     signals: signalsApi,
     portfolio: portfolioApiData,
+    runtimeStatus,
     isConnected,
     refreshAll: () => {
       ticksApi.refetch();
