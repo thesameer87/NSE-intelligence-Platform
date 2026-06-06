@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     signal_min_expected_return: float = Field(default=0.005, ge=0.0)
     signal_regression_alignment_threshold: float = Field(default=0.6, ge=0.5, le=1.0)
     monitored_symbols: list[str] = Field(
-        default=["RELIANCE-EQ", "TCS-EQ", "HDFCBANK-EQ", "INFY-EQ", "ICICIBANK-EQ"]
+        default=["NIFTY 50", "BANKNIFTY"]
     )
     
     model_config = SettingsConfigDict(
